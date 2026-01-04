@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
+  Animated,
 } from "react-native";
 import { router } from "expo-router";
 import { Theme } from "@/constants/Theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PieChart, ProgressChart } from "react-native-chart-kit";
+import { useFadeIn, useSlideIn } from "@/hooks/useAnimations";
 
 interface FinancialData {
   salary: number;
@@ -120,6 +122,10 @@ export default function DashboardScreen() {
   const categoryData = getCategoryData();
   const screenWidth = Dimensions.get("window").width;
 
+  // Animations
+  const fadeIn = useFadeIn(600);
+  const slideUp = useSlideIn("up", 600, 100);
+
   return (
     <ScrollView
       style={styles.container}
@@ -133,15 +139,23 @@ export default function DashboardScreen() {
       }
     >
       {/* Header */}
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, { opacity: fadeIn }]}>
         <View>
           <Text style={styles.greeting}>Olá! 👋</Text>
           <Text style={styles.subtitle}>Confira suas finanças</Text>
         </View>
-      </View>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => router.push("/settings")}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Saldo Card */}
-      <View style={styles.balanceCard}>
+      <Animated.View
+        style={[styles.balanceCard, { opacity: fadeIn, transform: [slideUp] }]}
+      >
         <View style={styles.balanceHeader}>
           <Text style={styles.balanceLabel}>Saldo Disponível</Text>
           <TouchableOpacity onPress={() => setShowBalance(!showBalance)}>
@@ -169,10 +183,10 @@ export default function DashboardScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Budget Progress */}
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, { opacity: fadeIn }]}>
         <Text style={styles.sectionTitle}>📊 Uso do Orçamento</Text>
         <View style={styles.card}>
           <ProgressChart
@@ -206,11 +220,11 @@ export default function DashboardScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Category Chart */}
       {categoryData.length > 0 && (
-        <View style={styles.section}>
+        <Animated.View style={[styles.section, { opacity: fadeIn }]}>
           <Text style={styles.sectionTitle}>🏷️ Gastos por Categoria</Text>
           <View style={styles.card}>
             <PieChart
@@ -226,11 +240,11 @@ export default function DashboardScreen() {
               absolute
             />
           </View>
-        </View>
+        </Animated.View>
       )}
 
       {/* Recent Transactions */}
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, { opacity: fadeIn }]}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>📝 Transações Recentes</Text>
           <TouchableOpacity onPress={() => router.push("/transactions/list")}>
@@ -289,10 +303,10 @@ export default function DashboardScreen() {
             </View>
           </View>
         ))}
-      </View>
+      </Animated.View>
 
       {/* Quick Actions */}
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, { opacity: fadeIn }]}>
         <Text style={styles.sectionTitle}>⚡ Ações Rápidas</Text>
         <View style={styles.quickActions}>
           <TouchableOpacity
@@ -317,7 +331,7 @@ export default function DashboardScreen() {
             <Text style={styles.quickActionText}>Ver{"\n"}Transações</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -336,6 +350,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: Theme.spacing.lg,
+  },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Theme.colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+  },
+  settingsIcon: {
+    fontSize: 24,
   },
   greeting: {
     fontSize: Theme.fontSize.xl,

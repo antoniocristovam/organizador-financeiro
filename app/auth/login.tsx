@@ -9,16 +9,20 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Theme } from "@/constants/Theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFadeIn, useScale } from "@/hooks/useAnimations";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -26,6 +30,7 @@ export default function LoginScreen() {
       return;
     }
 
+    setLoading(true);
     // Simulação de autenticação
     // TODO: Integrar com backend real
     try {
@@ -41,6 +46,8 @@ export default function LoginScreen() {
       router.replace("/onboarding");
     } catch (error) {
       Alert.alert("Erro", "Falha ao autenticar. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,6 +55,9 @@ export default function LoginScreen() {
     // TODO: Implementar autenticação social
     Alert.alert("Em breve", `Login com ${provider} será implementado em breve`);
   };
+
+  const fadeIn = useFadeIn(800);
+  const scale = useScale(800);
 
   return (
     <KeyboardAvoidingView
@@ -60,7 +70,9 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <View style={styles.header}>
+        <Animated.View
+          style={[styles.header, { opacity: fadeIn, transform: [{ scale }] }]}
+        >
           <Text style={styles.logo}>💰</Text>
           <Text style={styles.title}>Finanças Pro</Text>
           <Text style={styles.subtitle}>
@@ -68,10 +80,10 @@ export default function LoginScreen() {
               ? "Entre para gerenciar suas finanças"
               : "Crie sua conta gratuitamente"}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Form */}
-        <View style={styles.form}>
+        <Animated.View style={[styles.form, { opacity: fadeIn }]}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>E-mail</Text>
             <TextInput
@@ -105,10 +117,21 @@ export default function LoginScreen() {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleAuth}>
-            <Text style={styles.primaryButtonText}>
-              {isLogin ? "Entrar" : "Criar conta"}
-            </Text>
+          <TouchableOpacity
+            style={[
+              styles.primaryButton,
+              loading && styles.primaryButtonDisabled,
+            ]}
+            onPress={handleAuth}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Theme.colors.textPrimary} />
+            ) : (
+              <Text style={styles.primaryButtonText}>
+                {isLogin ? "Entrar" : "Criar conta"}
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Divider */}
@@ -148,7 +171,7 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -218,6 +241,9 @@ const styles = StyleSheet.create({
     padding: Theme.spacing.md,
     alignItems: "center",
     marginBottom: Theme.spacing.lg,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.6,
   },
   primaryButtonText: {
     color: Theme.colors.textPrimary,

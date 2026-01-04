@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -47,6 +48,7 @@ const INCOME_CATEGORIES: Category[] = [
 export default function AddTransactionScreen() {
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
@@ -85,6 +87,7 @@ export default function AddTransactionScreen() {
       return;
     }
 
+    setLoading(true);
     try {
       const transaction = {
         id: Date.now().toString(),
@@ -119,6 +122,8 @@ export default function AddTransactionScreen() {
       );
     } catch (error) {
       Alert.alert("Erro", "Não foi possível salvar a transação");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -258,8 +263,16 @@ export default function AddTransactionScreen() {
         )}
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Salvar Transação</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={Theme.colors.textPrimary} />
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar Transação</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -445,6 +458,9 @@ const styles = StyleSheet.create({
     padding: Theme.spacing.md,
     alignItems: "center",
     marginTop: Theme.spacing.lg,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
   },
   saveButtonText: {
     color: Theme.colors.textPrimary,

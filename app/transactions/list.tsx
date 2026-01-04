@@ -26,6 +26,9 @@ interface Transaction {
 export default function TransactionListScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
+  const [dateFilter, setDateFilter] = useState<
+    "all" | "7days" | "30days" | "90days"
+  >("all");
 
   useEffect(() => {
     loadTransactions();
@@ -75,7 +78,17 @@ export default function TransactionListScreen() {
     });
   };
 
-  const filteredTransactions = transactions.filter((t) => {
+  const getDateFilteredTransactions = () => {
+    if (dateFilter === "all") return transactions;
+
+    const now = new Date();
+    const days = dateFilter === "7days" ? 7 : dateFilter === "30days" ? 30 : 90;
+    const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+    return transactions.filter((t) => new Date(t.date) >= cutoffDate);
+  };
+
+  const filteredTransactions = getDateFilteredTransactions().filter((t) => {
     if (filter === "all") return true;
     return t.type === filter;
   });
@@ -142,7 +155,7 @@ export default function TransactionListScreen() {
         </View>
       </View>
 
-      {/* Filter */}
+      {/* Type Filter */}
       <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[
@@ -194,6 +207,76 @@ export default function TransactionListScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Date Filter */}
+      <View style={styles.dateFilterContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity
+            style={[
+              styles.dateFilterButton,
+              dateFilter === "all" && styles.dateFilterButtonActive,
+            ]}
+            onPress={() => setDateFilter("all")}
+          >
+            <Text
+              style={[
+                styles.dateFilterText,
+                dateFilter === "all" && styles.dateFilterTextActive,
+              ]}
+            >
+              📅 Todas
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.dateFilterButton,
+              dateFilter === "7days" && styles.dateFilterButtonActive,
+            ]}
+            onPress={() => setDateFilter("7days")}
+          >
+            <Text
+              style={[
+                styles.dateFilterText,
+                dateFilter === "7days" && styles.dateFilterTextActive,
+              ]}
+            >
+              📅 7 dias
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.dateFilterButton,
+              dateFilter === "30days" && styles.dateFilterButtonActive,
+            ]}
+            onPress={() => setDateFilter("30days")}
+          >
+            <Text
+              style={[
+                styles.dateFilterText,
+                dateFilter === "30days" && styles.dateFilterTextActive,
+              ]}
+            >
+              📅 30 dias
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.dateFilterButton,
+              dateFilter === "90days" && styles.dateFilterButtonActive,
+            ]}
+            onPress={() => setDateFilter("90days")}
+          >
+            <Text
+              style={[
+                styles.dateFilterText,
+                dateFilter === "90days" && styles.dateFilterTextActive,
+              ]}
+            >
+              📅 90 dias
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
       {/* Transaction List */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {filteredTransactions.length === 0 ? (
@@ -209,65 +292,69 @@ export default function TransactionListScreen() {
           </View>
         ) : (
           filteredTransactions.map((transaction) => (
-            <TouchableOpacity
-              key={transaction.id}
-              style={styles.transactionItem}
-              onLongPress={() => deleteTransaction(transaction.id)}
-            >
-              <View style={styles.transactionLeft}>
-                <View
-                  style={[
-                    styles.transactionIcon,
-                    {
-                      backgroundColor:
-                        transaction.type === "income"
-                          ? Theme.colors.success + "20"
-                          : Theme.colors.danger + "20",
-                    },
-                  ]}
-                >
-                  <Text style={styles.transactionEmoji}>
-                    {transaction.type === "income" ? "📈" : "📉"}
+            <View key={transaction.id} style={styles.transactionWrapper}>
+              <TouchableOpacity
+                style={styles.transactionItem}
+                onPress={() =>
+                  router.push(`/transactions/edit/${transaction.id}`)
+                }
+                onLongPress={() => deleteTransaction(transaction.id)}
+              >
+                <View style={styles.transactionLeft}>
+                  <View
+                    style={[
+                      styles.transactionIcon,
+                      {
+                        backgroundColor:
+                          transaction.type === "income"
+                            ? Theme.colors.success + "20"
+                            : Theme.colors.danger + "20",
+                      },
+                    ]}
+                  >
+                    <Text style={styles.transactionEmoji}>
+                      {transaction.type === "income" ? "📈" : "📉"}
+                    </Text>
+                  </View>
+                  <View style={styles.transactionInfo}>
+                    <Text style={styles.transactionCategory}>
+                      {transaction.category}
+                    </Text>
+                    <Text style={styles.transactionDescription}>
+                      {transaction.description}
+                    </Text>
+                    {transaction.isRecurring && (
+                      <View style={styles.recurringBadge}>
+                        <Text style={styles.recurringText}>🔁 Recorrente</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                <View style={styles.transactionRight}>
+                  <Text
+                    style={[
+                      styles.transactionAmount,
+                      {
+                        color:
+                          transaction.type === "income"
+                            ? Theme.colors.success
+                            : Theme.colors.danger,
+                      },
+                    ]}
+                  >
+                    {transaction.type === "income" ? "+" : "-"}{" "}
+                    {formatCurrency(transaction.amount)}
+                  </Text>
+                  <Text style={styles.transactionDate}>
+                    {new Date(transaction.date).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </Text>
                 </View>
-                <View style={styles.transactionInfo}>
-                  <Text style={styles.transactionCategory}>
-                    {transaction.category}
-                  </Text>
-                  <Text style={styles.transactionDescription}>
-                    {transaction.description}
-                  </Text>
-                  {transaction.isRecurring && (
-                    <View style={styles.recurringBadge}>
-                      <Text style={styles.recurringText}>🔁 Recorrente</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-              <View style={styles.transactionRight}>
-                <Text
-                  style={[
-                    styles.transactionAmount,
-                    {
-                      color:
-                        transaction.type === "income"
-                          ? Theme.colors.success
-                          : Theme.colors.danger,
-                    },
-                  ]}
-                >
-                  {transaction.type === "income" ? "+" : "-"}{" "}
-                  {formatCurrency(transaction.amount)}
-                </Text>
-                <Text style={styles.transactionDate}>
-                  {new Date(transaction.date).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </Text>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           ))
         )}
       </ScrollView>
@@ -358,8 +445,36 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: Theme.colors.textPrimary,
   },
+  dateFilterContainer: {
+    paddingHorizontal: Theme.spacing.lg,
+    marginBottom: Theme.spacing.md,
+  },
+  dateFilterButton: {
+    paddingVertical: Theme.spacing.sm,
+    paddingHorizontal: Theme.spacing.md,
+    borderRadius: Theme.borderRadius.md,
+    backgroundColor: Theme.colors.surface,
+    marginRight: Theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+  },
+  dateFilterButtonActive: {
+    backgroundColor: Theme.colors.primary,
+    borderColor: Theme.colors.primary,
+  },
+  dateFilterText: {
+    fontSize: Theme.fontSize.sm,
+    color: Theme.colors.textSecondary,
+    fontWeight: "600",
+  },
+  dateFilterTextActive: {
+    color: Theme.colors.textPrimary,
+  },
   scrollContent: {
     padding: Theme.spacing.lg,
+  },
+  transactionWrapper: {
+    marginBottom: Theme.spacing.sm,
   },
   transactionItem: {
     flexDirection: "row",
@@ -368,7 +483,6 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.surface,
     padding: Theme.spacing.md,
     borderRadius: Theme.borderRadius.md,
-    marginBottom: Theme.spacing.sm,
     borderWidth: 1,
     borderColor: Theme.colors.border,
   },
