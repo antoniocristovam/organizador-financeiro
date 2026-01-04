@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,22 +10,22 @@ import {
   ScrollView,
   Switch,
   Alert,
-} from 'react-native';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Theme } from '@/constants/Theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Theme } from "@/constants/Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function OnboardingScreen() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [salary, setSalary] = useState('');
+  const [salary, setSalary] = useState("");
   const [hasExtraIncome, setHasExtraIncome] = useState(false);
-  const [extraIncome, setExtraIncome] = useState('');
+  const [extraIncome, setExtraIncome] = useState("");
 
   const formatCurrency = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     const amount = parseFloat(numbers) / 100;
-    return amount.toLocaleString('pt-BR', {
+    return amount.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -40,13 +40,13 @@ export default function OnboardingScreen() {
   };
 
   const parseCurrency = (value: string) => {
-    return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+    return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
 
   const handleNext = () => {
     if (currentStep === 1) {
       if (!salary || parseCurrency(salary) === 0) {
-        Alert.alert('Atenção', 'Por favor, informe seu salário mensal');
+        Alert.alert("Atenção", "Por favor, informe seu salário mensal");
         return;
       }
       setCurrentStep(2);
@@ -58,7 +58,10 @@ export default function OnboardingScreen() {
       }
     } else if (currentStep === 3) {
       if (!extraIncome || parseCurrency(extraIncome) === 0) {
-        Alert.alert('Atenção', 'Por favor, informe sua renda extra ou desative a opção');
+        Alert.alert(
+          "Atenção",
+          "Por favor, informe sua renda extra ou desative a opção"
+        );
         return;
       }
       finishOnboarding();
@@ -80,12 +83,12 @@ export default function OnboardingScreen() {
         onboardingComplete: true,
       };
 
-      await AsyncStorage.setItem('userFinancialData', JSON.stringify(userData));
-      
+      await AsyncStorage.setItem("userFinancialData", JSON.stringify(userData));
+
       // Redireciona para o dashboard
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao salvar seus dados. Tente novamente.');
+      Alert.alert("Erro", "Falha ao salvar seus dados. Tente novamente.");
     }
   };
 
@@ -144,14 +147,19 @@ export default function OnboardingScreen() {
           <View>
             <Text style={styles.switchLabel}>Possuo renda extra</Text>
             <Text style={styles.switchDescription}>
-              {hasExtraIncome ? 'Vamos configurar no próximo passo' : 'Ative para configurar'}
+              {hasExtraIncome
+                ? "Vamos configurar no próximo passo"
+                : "Ative para configurar"}
             </Text>
           </View>
           <Switch
             value={hasExtraIncome}
             onValueChange={setHasExtraIncome}
-            trackColor={{ false: Theme.colors.border, true: Theme.colors.primary }}
-            thumbColor={hasExtraIncome ? Theme.colors.primaryDark : '#f4f3f4'}
+            trackColor={{
+              false: Theme.colors.border,
+              true: Theme.colors.primary,
+            }}
+            thumbColor={hasExtraIncome ? Theme.colors.primaryDark : "#f4f3f4"}
           />
         </View>
       </View>
@@ -187,10 +195,14 @@ export default function OnboardingScreen() {
       <View style={styles.summaryBox}>
         <Text style={styles.summaryTitle}>📈 Sua renda total mensal</Text>
         <Text style={styles.summaryValue}>
-          R$ {(parseCurrency(salary) + parseCurrency(extraIncome)).toLocaleString('pt-BR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          R${" "}
+          {(parseCurrency(salary) + parseCurrency(extraIncome)).toLocaleString(
+            "pt-BR",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          )}
         </Text>
         <View style={styles.summaryBreakdown}>
           <View style={styles.summaryItem}>
@@ -199,8 +211,10 @@ export default function OnboardingScreen() {
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Extra</Text>
-            <Text style={[styles.summaryAmount, { color: Theme.colors.success }]}>
-              R$ {extraIncome || '0,00'}
+            <Text
+              style={[styles.summaryAmount, { color: Theme.colors.success }]}
+            >
+              R$ {extraIncome || "0,00"}
             </Text>
           </View>
         </View>
@@ -211,7 +225,7 @@ export default function OnboardingScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
       <ScrollView
@@ -226,19 +240,22 @@ export default function OnboardingScreen() {
 
         <View style={styles.buttonContainer}>
           {currentStep > 1 && (
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleBack}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleBack}
+            >
               <Text style={styles.secondaryButtonText}>← Voltar</Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity
             style={[styles.primaryButton, currentStep > 1 && { flex: 1 }]}
             onPress={handleNext}
           >
             <Text style={styles.primaryButtonText}>
               {currentStep === 3 || (currentStep === 2 && !hasExtraIncome)
-                ? 'Finalizar'
-                : 'Continuar →'}
+                ? "Finalizar"
+                : "Continuar →"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -264,10 +281,10 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: Theme.colors.surface,
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBarFill: {
-    height: '100%',
+    height: "100%",
     backgroundColor: Theme.colors.primary,
     borderRadius: 2,
   },
@@ -275,12 +292,12 @@ const styles = StyleSheet.create({
     color: Theme.colors.textSecondary,
     fontSize: Theme.fontSize.sm,
     marginTop: Theme.spacing.sm,
-    textAlign: 'center',
+    textAlign: "center",
   },
   stepContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emoji: {
     fontSize: 64,
@@ -288,55 +305,55 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: Theme.fontSize.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Theme.spacing.sm,
   },
   stepSubtitle: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Theme.spacing.xl,
     paddingHorizontal: Theme.spacing.lg,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.borderRadius.md,
     borderWidth: 2,
     borderColor: Theme.colors.border,
     paddingHorizontal: Theme.spacing.lg,
     marginBottom: Theme.spacing.lg,
-    width: '100%',
+    width: "100%",
   },
   currencyPrefix: {
     fontSize: Theme.fontSize.xl,
     color: Theme.colors.textPrimary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: Theme.spacing.sm,
   },
   currencyInput: {
     flex: 1,
     fontSize: Theme.fontSize.xl,
     color: Theme.colors.textPrimary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingVertical: Theme.spacing.lg,
   },
   hint: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   switchContainer: {
-    width: '100%',
+    width: "100%",
     marginBottom: Theme.spacing.lg,
   },
   switchOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: Theme.colors.surface,
     padding: Theme.spacing.lg,
     borderRadius: Theme.borderRadius.md,
@@ -346,7 +363,7 @@ const styles = StyleSheet.create({
   switchLabel: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   switchDescription: {
     fontSize: Theme.fontSize.sm,
@@ -359,31 +376,31 @@ const styles = StyleSheet.create({
     borderRadius: Theme.borderRadius.md,
     borderWidth: 1,
     borderColor: Theme.colors.primary,
-    width: '100%',
+    width: "100%",
     marginTop: Theme.spacing.lg,
   },
   summaryTitle: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textSecondary,
     marginBottom: Theme.spacing.sm,
-    textAlign: 'center',
+    textAlign: "center",
   },
   summaryValue: {
     fontSize: Theme.fontSize.xxl,
     color: Theme.colors.textPrimary,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: Theme.spacing.md,
   },
   summaryBreakdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingTop: Theme.spacing.md,
     borderTopWidth: 1,
     borderTopColor: Theme.colors.border,
   },
   summaryItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   summaryLabel: {
     fontSize: Theme.fontSize.xs,
@@ -393,10 +410,10 @@ const styles = StyleSheet.create({
   summaryAmount: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Theme.spacing.md,
     marginTop: Theme.spacing.xl,
   },
@@ -404,19 +421,19 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.primary,
     borderRadius: Theme.borderRadius.md,
     padding: Theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   primaryButtonText: {
     color: Theme.colors.textPrimary,
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   secondaryButton: {
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.borderRadius.md,
     padding: Theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: Theme.colors.border,
     paddingHorizontal: Theme.spacing.lg,
@@ -424,6 +441,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: Theme.colors.textPrimary,
     fontSize: Theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
