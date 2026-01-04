@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,15 +7,15 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-} from 'react-native';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Theme } from '@/constants/Theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Theme } from "@/constants/Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Transaction {
   id: string;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   amount: number;
   category: string;
   description: string;
@@ -25,7 +25,7 @@ interface Transaction {
 
 export default function TransactionListScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
 
   useEffect(() => {
     loadTransactions();
@@ -33,31 +33,34 @@ export default function TransactionListScreen() {
 
   const loadTransactions = async () => {
     try {
-      const data = await AsyncStorage.getItem('transactions');
+      const data = await AsyncStorage.getItem("transactions");
       if (data) {
         setTransactions(JSON.parse(data));
       }
     } catch (error) {
-      console.error('Erro ao carregar transações:', error);
+      console.error("Erro ao carregar transações:", error);
     }
   };
 
   const deleteTransaction = async (id: string) => {
     Alert.alert(
-      'Confirmar exclusão',
-      'Deseja realmente excluir esta transação?',
+      "Confirmar exclusão",
+      "Deseja realmente excluir esta transação?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir',
-          style: 'destructive',
+          text: "Excluir",
+          style: "destructive",
           onPress: async () => {
             try {
-              const updated = transactions.filter(t => t.id !== id);
-              await AsyncStorage.setItem('transactions', JSON.stringify(updated));
+              const updated = transactions.filter((t) => t.id !== id);
+              await AsyncStorage.setItem(
+                "transactions",
+                JSON.stringify(updated)
+              );
               setTransactions(updated);
             } catch (error) {
-              Alert.alert('Erro', 'Não foi possível excluir a transação');
+              Alert.alert("Erro", "Não foi possível excluir a transação");
             }
           },
         },
@@ -66,24 +69,24 @@ export default function TransactionListScreen() {
   };
 
   const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     });
   };
 
-  const filteredTransactions = transactions.filter(t => {
-    if (filter === 'all') return true;
+  const filteredTransactions = transactions.filter((t) => {
+    if (filter === "all") return true;
     return t.type === filter;
   });
 
   const getTotals = () => {
     const income = transactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === "income")
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     const expenses = transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === "expense")
       .reduce((sum, t) => sum + t.amount, 0);
 
     return { income, expenses, balance: income - expenses };
@@ -94,14 +97,17 @@ export default function TransactionListScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Transações</Text>
-        <TouchableOpacity onPress={() => router.push('/transactions/add')}>
+        <TouchableOpacity onPress={() => router.push("/transactions/add")}>
           <Text style={styles.addIcon}>+</Text>
         </TouchableOpacity>
       </View>
@@ -122,7 +128,15 @@ export default function TransactionListScreen() {
         </View>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Saldo</Text>
-          <Text style={[styles.summaryValue, { color: balance >= 0 ? Theme.colors.success : Theme.colors.danger }]}>
+          <Text
+            style={[
+              styles.summaryValue,
+              {
+                color:
+                  balance >= 0 ? Theme.colors.success : Theme.colors.danger,
+              },
+            ]}
+          >
             {formatCurrency(balance)}
           </Text>
         </View>
@@ -131,26 +145,50 @@ export default function TransactionListScreen() {
       {/* Filter */}
       <View style={styles.filterContainer}>
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
-          onPress={() => setFilter('all')}
+          style={[
+            styles.filterButton,
+            filter === "all" && styles.filterButtonActive,
+          ]}
+          onPress={() => setFilter("all")}
         >
-          <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
+          <Text
+            style={[
+              styles.filterText,
+              filter === "all" && styles.filterTextActive,
+            ]}
+          >
             Todas
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'income' && styles.filterButtonActive]}
-          onPress={() => setFilter('income')}
+          style={[
+            styles.filterButton,
+            filter === "income" && styles.filterButtonActive,
+          ]}
+          onPress={() => setFilter("income")}
         >
-          <Text style={[styles.filterText, filter === 'income' && styles.filterTextActive]}>
+          <Text
+            style={[
+              styles.filterText,
+              filter === "income" && styles.filterTextActive,
+            ]}
+          >
             Receitas
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'expense' && styles.filterButtonActive]}
-          onPress={() => setFilter('expense')}
+          style={[
+            styles.filterButton,
+            filter === "expense" && styles.filterButtonActive,
+          ]}
+          onPress={() => setFilter("expense")}
         >
-          <Text style={[styles.filterText, filter === 'expense' && styles.filterTextActive]}>
+          <Text
+            style={[
+              styles.filterText,
+              filter === "expense" && styles.filterTextActive,
+            ]}
+          >
             Despesas
           </Text>
         </TouchableOpacity>
@@ -164,7 +202,7 @@ export default function TransactionListScreen() {
             <Text style={styles.emptyText}>Nenhuma transação encontrada</Text>
             <TouchableOpacity
               style={styles.emptyButton}
-              onPress={() => router.push('/transactions/add')}
+              onPress={() => router.push("/transactions/add")}
             >
               <Text style={styles.emptyButtonText}>Adicionar Transação</Text>
             </TouchableOpacity>
@@ -177,17 +215,28 @@ export default function TransactionListScreen() {
               onLongPress={() => deleteTransaction(transaction.id)}
             >
               <View style={styles.transactionLeft}>
-                <View style={[
-                  styles.transactionIcon,
-                  { backgroundColor: transaction.type === 'income' ? Theme.colors.success + '20' : Theme.colors.danger + '20' }
-                ]}>
+                <View
+                  style={[
+                    styles.transactionIcon,
+                    {
+                      backgroundColor:
+                        transaction.type === "income"
+                          ? Theme.colors.success + "20"
+                          : Theme.colors.danger + "20",
+                    },
+                  ]}
+                >
                   <Text style={styles.transactionEmoji}>
-                    {transaction.type === 'income' ? '📈' : '📉'}
+                    {transaction.type === "income" ? "📈" : "📉"}
                   </Text>
                 </View>
                 <View style={styles.transactionInfo}>
-                  <Text style={styles.transactionCategory}>{transaction.category}</Text>
-                  <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                  <Text style={styles.transactionCategory}>
+                    {transaction.category}
+                  </Text>
+                  <Text style={styles.transactionDescription}>
+                    {transaction.description}
+                  </Text>
                   {transaction.isRecurring && (
                     <View style={styles.recurringBadge}>
                       <Text style={styles.recurringText}>🔁 Recorrente</Text>
@@ -196,17 +245,25 @@ export default function TransactionListScreen() {
                 </View>
               </View>
               <View style={styles.transactionRight}>
-                <Text style={[
-                  styles.transactionAmount,
-                  { color: transaction.type === 'income' ? Theme.colors.success : Theme.colors.danger }
-                ]}>
-                  {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount)}
+                <Text
+                  style={[
+                    styles.transactionAmount,
+                    {
+                      color:
+                        transaction.type === "income"
+                          ? Theme.colors.success
+                          : Theme.colors.danger,
+                    },
+                  ]}
+                >
+                  {transaction.type === "income" ? "+" : "-"}{" "}
+                  {formatCurrency(transaction.amount)}
                 </Text>
                 <Text style={styles.transactionDate}>
-                  {new Date(transaction.date).toLocaleDateString('pt-BR', { 
-                    day: '2-digit', 
-                    month: 'short',
-                    year: 'numeric'
+                  {new Date(transaction.date).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
                   })}
                 </Text>
               </View>
@@ -224,18 +281,18 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: Theme.spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingBottom: Theme.spacing.md,
   },
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   backIcon: {
     fontSize: 28,
@@ -243,17 +300,17 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: Theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
   },
   addIcon: {
     fontSize: 32,
     color: Theme.colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   summary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: Theme.spacing.lg,
     paddingVertical: Theme.spacing.md,
     backgroundColor: Theme.colors.surface,
@@ -262,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: Theme.spacing.lg,
   },
   summaryItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   summaryLabel: {
     fontSize: Theme.fontSize.xs,
@@ -271,10 +328,10 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   filterContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: Theme.spacing.lg,
     gap: Theme.spacing.sm,
     marginBottom: Theme.spacing.md,
@@ -285,7 +342,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.md,
     borderRadius: Theme.borderRadius.md,
     backgroundColor: Theme.colors.surface,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: Theme.colors.border,
   },
@@ -296,7 +353,7 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   filterTextActive: {
     color: Theme.colors.textPrimary,
@@ -305,9 +362,9 @@ const styles = StyleSheet.create({
     padding: Theme.spacing.lg,
   },
   transactionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: Theme.colors.surface,
     padding: Theme.spacing.md,
     borderRadius: Theme.borderRadius.md,
@@ -316,16 +373,16 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.border,
   },
   transactionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   transactionIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: Theme.spacing.md,
   },
   transactionEmoji: {
@@ -337,7 +394,7 @@ const styles = StyleSheet.create({
   transactionCategory: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   transactionDescription: {
     fontSize: Theme.fontSize.sm,
@@ -345,7 +402,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   recurringBadge: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 4,
   },
   recurringText: {
@@ -353,11 +410,11 @@ const styles = StyleSheet.create({
     color: Theme.colors.primary,
   },
   transactionRight: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   transactionAmount: {
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   transactionDate: {
     fontSize: Theme.fontSize.xs,
@@ -365,8 +422,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: Theme.spacing.xxl * 2,
   },
   emptyEmoji: {
@@ -387,6 +444,6 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: Theme.colors.textPrimary,
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

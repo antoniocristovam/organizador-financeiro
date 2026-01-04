@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   ScrollView,
   Alert,
   Platform,
-} from 'react-native';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Theme } from '@/constants/Theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Theme } from "@/constants/Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type TransactionType = 'expense' | 'income';
+type TransactionType = "expense" | "income";
 
 interface Category {
   id: string;
@@ -24,40 +24,43 @@ interface Category {
 }
 
 const EXPENSE_CATEGORIES: Category[] = [
-  { id: '1', name: 'Mercado', icon: '🛒', type: 'expense' },
-  { id: '2', name: 'Transporte', icon: '🚗', type: 'expense' },
-  { id: '3', name: 'Alimentação', icon: '🍔', type: 'expense' },
-  { id: '4', name: 'Lazer', icon: '🎮', type: 'expense' },
-  { id: '5', name: 'Saúde', icon: '💊', type: 'expense' },
-  { id: '6', name: 'Casa', icon: '🏠', type: 'expense' },
-  { id: '7', name: 'Educação', icon: '📚', type: 'expense' },
-  { id: '8', name: 'Vestuário', icon: '👕', type: 'expense' },
-  { id: '9', name: 'Outros', icon: '📦', type: 'expense' },
+  { id: "1", name: "Mercado", icon: "🛒", type: "expense" },
+  { id: "2", name: "Transporte", icon: "🚗", type: "expense" },
+  { id: "3", name: "Alimentação", icon: "🍔", type: "expense" },
+  { id: "4", name: "Lazer", icon: "🎮", type: "expense" },
+  { id: "5", name: "Saúde", icon: "💊", type: "expense" },
+  { id: "6", name: "Casa", icon: "🏠", type: "expense" },
+  { id: "7", name: "Educação", icon: "📚", type: "expense" },
+  { id: "8", name: "Vestuário", icon: "👕", type: "expense" },
+  { id: "9", name: "Outros", icon: "📦", type: "expense" },
 ];
 
 const INCOME_CATEGORIES: Category[] = [
-  { id: '10', name: 'Salário', icon: '💰', type: 'income' },
-  { id: '11', name: 'Freelance', icon: '💻', type: 'income' },
-  { id: '12', name: 'Investimentos', icon: '📈', type: 'income' },
-  { id: '13', name: 'Vendas', icon: '💵', type: 'income' },
-  { id: '14', name: 'Presentes', icon: '🎁', type: 'income' },
-  { id: '15', name: 'Outros', icon: '💸', type: 'income' },
+  { id: "10", name: "Salário", icon: "💰", type: "income" },
+  { id: "11", name: "Freelance", icon: "💻", type: "income" },
+  { id: "12", name: "Investimentos", icon: "📈", type: "income" },
+  { id: "13", name: "Vendas", icon: "💵", type: "income" },
+  { id: "14", name: "Presentes", icon: "🎁", type: "income" },
+  { id: "15", name: "Outros", icon: "💸", type: "income" },
 ];
 
 export default function AddTransactionScreen() {
-  const [type, setType] = useState<TransactionType>('expense');
-  const [amount, setAmount] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [description, setDescription] = useState('');
+  const [type, setType] = useState<TransactionType>("expense");
+  const [amount, setAmount] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
+  const [description, setDescription] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const categories =
+    type === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
   const formatCurrency = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     const amount = parseFloat(numbers) / 100;
-    return amount.toLocaleString('pt-BR', {
+    return amount.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -68,17 +71,17 @@ export default function AddTransactionScreen() {
   };
 
   const parseCurrency = (value: string) => {
-    return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+    return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
 
   const handleSave = async () => {
     if (!amount || parseCurrency(amount) === 0) {
-      Alert.alert('Erro', 'Por favor, informe o valor');
+      Alert.alert("Erro", "Por favor, informe o valor");
       return;
     }
 
     if (!selectedCategory) {
-      Alert.alert('Erro', 'Por favor, selecione uma categoria');
+      Alert.alert("Erro", "Por favor, selecione uma categoria");
       return;
     }
 
@@ -95,37 +98,40 @@ export default function AddTransactionScreen() {
       };
 
       // Carregar transações existentes
-      const existingData = await AsyncStorage.getItem('transactions');
+      const existingData = await AsyncStorage.getItem("transactions");
       const transactions = existingData ? JSON.parse(existingData) : [];
-      
+
       // Adicionar nova transação
       transactions.unshift(transaction);
-      
+
       // Salvar
-      await AsyncStorage.setItem('transactions', JSON.stringify(transactions));
+      await AsyncStorage.setItem("transactions", JSON.stringify(transactions));
 
       Alert.alert(
-        'Sucesso! 🎉',
-        `${type === 'expense' ? 'Despesa' : 'Receita'} adicionada com sucesso`,
+        "Sucesso! 🎉",
+        `${type === "expense" ? "Despesa" : "Receita"} adicionada com sucesso`,
         [
           {
-            text: 'OK',
+            text: "OK",
             onPress: () => router.back(),
           },
         ]
       );
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível salvar a transação');
+      Alert.alert("Erro", "Não foi possível salvar a transação");
     }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Nova Transação</Text>
@@ -136,27 +142,43 @@ export default function AddTransactionScreen() {
         {/* Type Selector */}
         <View style={styles.typeSelector}>
           <TouchableOpacity
-            style={[styles.typeButton, type === 'expense' && styles.typeButtonActive]}
+            style={[
+              styles.typeButton,
+              type === "expense" && styles.typeButtonActive,
+            ]}
             onPress={() => {
-              setType('expense');
+              setType("expense");
               setSelectedCategory(null);
             }}
           >
             <Text style={styles.typeEmoji}>📉</Text>
-            <Text style={[styles.typeText, type === 'expense' && styles.typeTextActive]}>
+            <Text
+              style={[
+                styles.typeText,
+                type === "expense" && styles.typeTextActive,
+              ]}
+            >
               Despesa
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            style={[styles.typeButton, type === 'income' && styles.typeButtonActive]}
+            style={[
+              styles.typeButton,
+              type === "income" && styles.typeButtonActive,
+            ]}
             onPress={() => {
-              setType('income');
+              setType("income");
               setSelectedCategory(null);
             }}
           >
             <Text style={styles.typeEmoji}>📈</Text>
-            <Text style={[styles.typeText, type === 'income' && styles.typeTextActive]}>
+            <Text
+              style={[
+                styles.typeText,
+                type === "income" && styles.typeTextActive,
+              ]}
+            >
               Receita
             </Text>
           </TouchableOpacity>
@@ -187,7 +209,8 @@ export default function AddTransactionScreen() {
                 key={category.id}
                 style={[
                   styles.categoryItem,
-                  selectedCategory?.id === category.id && styles.categoryItemActive,
+                  selectedCategory?.id === category.id &&
+                    styles.categoryItemActive,
                 ]}
                 onPress={() => setSelectedCategory(category)}
               >
@@ -213,13 +236,15 @@ export default function AddTransactionScreen() {
         </View>
 
         {/* Recurring */}
-        {type === 'expense' && (
+        {type === "expense" && (
           <TouchableOpacity
             style={styles.recurringOption}
             onPress={() => setIsRecurring(!isRecurring)}
           >
             <View style={styles.checkboxContainer}>
-              <View style={[styles.checkbox, isRecurring && styles.checkboxActive]}>
+              <View
+                style={[styles.checkbox, isRecurring && styles.checkboxActive]}
+              >
                 {isRecurring && <Text style={styles.checkmark}>✓</Text>}
               </View>
               <View>
@@ -247,18 +272,18 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: Theme.spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingBottom: Theme.spacing.md,
   },
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   backIcon: {
     fontSize: 28,
@@ -266,14 +291,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: Theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
   },
   scrollContent: {
     padding: Theme.spacing.lg,
   },
   typeSelector: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Theme.spacing.md,
     marginBottom: Theme.spacing.xl,
   },
@@ -282,13 +307,13 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.borderRadius.md,
     padding: Theme.spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
     borderColor: Theme.colors.border,
   },
   typeButtonActive: {
     borderColor: Theme.colors.primary,
-    backgroundColor: Theme.colors.primary + '20',
+    backgroundColor: Theme.colors.primary + "20",
   },
   typeEmoji: {
     fontSize: 32,
@@ -297,7 +322,7 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   typeTextActive: {
     color: Theme.colors.primary,
@@ -307,13 +332,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
     marginBottom: Theme.spacing.md,
   },
   amountWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.borderRadius.md,
     borderWidth: 2,
@@ -323,34 +348,34 @@ const styles = StyleSheet.create({
   currencyPrefix: {
     fontSize: Theme.fontSize.xxl,
     color: Theme.colors.textPrimary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: Theme.spacing.sm,
   },
   amountInput: {
     flex: 1,
     fontSize: Theme.fontSize.xxl,
     color: Theme.colors.textPrimary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingVertical: Theme.spacing.lg,
   },
   categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: Theme.spacing.md,
   },
   categoryItem: {
-    width: '30%',
+    width: "30%",
     aspectRatio: 1,
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: Theme.colors.border,
   },
   categoryItemActive: {
     borderColor: Theme.colors.primary,
-    backgroundColor: Theme.colors.primary + '20',
+    backgroundColor: Theme.colors.primary + "20",
   },
   categoryIcon: {
     fontSize: 32,
@@ -359,8 +384,8 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: Theme.fontSize.xs,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   descriptionInput: {
     backgroundColor: Theme.colors.surface,
@@ -371,7 +396,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Theme.colors.border,
     minHeight: 80,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   recurringOption: {
     backgroundColor: Theme.colors.surface,
@@ -382,8 +407,8 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.border,
   },
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   checkbox: {
     width: 24,
@@ -392,8 +417,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Theme.colors.border,
     marginRight: Theme.spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxActive: {
     backgroundColor: Theme.colors.primary,
@@ -402,12 +427,12 @@ const styles = StyleSheet.create({
   checkmark: {
     color: Theme.colors.textPrimary,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   recurringLabel: {
     fontSize: Theme.fontSize.md,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   recurringDescription: {
     fontSize: Theme.fontSize.sm,
@@ -418,12 +443,12 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.primary,
     borderRadius: Theme.borderRadius.md,
     padding: Theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: Theme.spacing.lg,
   },
   saveButtonText: {
     color: Theme.colors.textPrimary,
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
