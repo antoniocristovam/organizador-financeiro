@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -6,14 +6,14 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { Theme } from '@/constants/Theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
+} from "react-native";
+import { Theme } from "@/constants/Theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BarChart, LineChart, PieChart } from "react-native-chart-kit";
 
 interface Transaction {
   id: string;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   amount: number;
   category: string;
   description: string;
@@ -27,12 +27,12 @@ interface MonthData {
   balance: number;
 }
 
-type FilterPeriod = 'current' | 'last' | 'last3' | 'last6' | 'year';
+type FilterPeriod = "current" | "last" | "last3" | "last6" | "year";
 
 export default function ReportsScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<FilterPeriod>('current');
-  const screenWidth = Dimensions.get('window').width;
+  const [selectedPeriod, setSelectedPeriod] = useState<FilterPeriod>("current");
+  const screenWidth = Dimensions.get("window").width;
 
   useEffect(() => {
     loadTransactions();
@@ -40,12 +40,12 @@ export default function ReportsScreen() {
 
   const loadTransactions = async () => {
     try {
-      const data = await AsyncStorage.getItem('transactions');
+      const data = await AsyncStorage.getItem("transactions");
       if (data) {
         setTransactions(JSON.parse(data));
       }
     } catch (error) {
-      console.error('Erro ao carregar transações:', error);
+      console.error("Erro ao carregar transações:", error);
     }
   };
 
@@ -54,40 +54,45 @@ export default function ReportsScreen() {
     let startDate: Date;
 
     switch (selectedPeriod) {
-      case 'current':
+      case "current":
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
-      case 'last':
+      case "last":
         startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-        return transactions.filter(t => {
+        return transactions.filter((t) => {
           const date = new Date(t.date);
           return date >= startDate && date <= endDate;
         });
-      case 'last3':
+      case "last3":
         startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
         break;
-      case 'last6':
+      case "last6":
         startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
         break;
-      case 'year':
+      case "year":
         startDate = new Date(now.getFullYear(), 0, 1);
         break;
       default:
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    return transactions.filter(t => new Date(t.date) >= startDate);
+    return transactions.filter((t) => new Date(t.date) >= startDate);
   };
 
   const getMonthlyData = (): MonthData[] => {
     const filtered = getFilteredTransactions();
     const monthsMap: { [key: string]: MonthData } = {};
 
-    filtered.forEach(t => {
+    filtered.forEach((t) => {
       const date = new Date(t.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+      const monthName = date.toLocaleDateString("pt-BR", {
+        month: "short",
+        year: "2-digit",
+      });
 
       if (!monthsMap[monthKey]) {
         monthsMap[monthKey] = {
@@ -98,26 +103,39 @@ export default function ReportsScreen() {
         };
       }
 
-      if (t.type === 'income') {
+      if (t.type === "income") {
         monthsMap[monthKey].income += t.amount;
       } else {
         monthsMap[monthKey].expenses += t.amount;
       }
-      monthsMap[monthKey].balance = monthsMap[monthKey].income - monthsMap[monthKey].expenses;
+      monthsMap[monthKey].balance =
+        monthsMap[monthKey].income - monthsMap[monthKey].expenses;
     });
 
-    return Object.values(monthsMap).sort((a, b) => a.month.localeCompare(b.month));
+    return Object.values(monthsMap).sort((a, b) =>
+      a.month.localeCompare(b.month)
+    );
   };
 
   const getCategoryBreakdown = () => {
-    const filtered = getFilteredTransactions().filter(t => t.type === 'expense');
+    const filtered = getFilteredTransactions().filter(
+      (t) => t.type === "expense"
+    );
     const categories: { [key: string]: number } = {};
 
-    filtered.forEach(t => {
+    filtered.forEach((t) => {
       categories[t.category] = (categories[t.category] || 0) + t.amount;
     });
 
-    const colors = ['#8B5CF6', '#F75A68', '#04D361', '#F59E0B', '#3B82F6', '#EC4899', '#10B981'];
+    const colors = [
+      "#8B5CF6",
+      "#F75A68",
+      "#04D361",
+      "#F59E0B",
+      "#3B82F6",
+      "#EC4899",
+      "#10B981",
+    ];
     const sorted = Object.entries(categories)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 7);
@@ -133,15 +151,19 @@ export default function ReportsScreen() {
 
   const getTotals = () => {
     const filtered = getFilteredTransactions();
-    const income = filtered.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const expenses = filtered.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const income = filtered
+      .filter((t) => t.type === "income")
+      .reduce((sum, t) => sum + t.amount, 0);
+    const expenses = filtered
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + t.amount, 0);
     return { income, expenses, balance: income - expenses };
   };
 
   const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     });
   };
 
@@ -150,24 +172,29 @@ export default function ReportsScreen() {
   const totals = getTotals();
 
   const periods = [
-    { key: 'current' as FilterPeriod, label: 'Mês Atual' },
-    { key: 'last' as FilterPeriod, label: 'Mês Passado' },
-    { key: 'last3' as FilterPeriod, label: 'Últimos 3' },
-    { key: 'last6' as FilterPeriod, label: 'Últimos 6' },
-    { key: 'year' as FilterPeriod, label: 'Ano' },
+    { key: "current" as FilterPeriod, label: "Mês Atual" },
+    { key: "last" as FilterPeriod, label: "Mês Passado" },
+    { key: "last3" as FilterPeriod, label: "Últimos 3" },
+    { key: "last6" as FilterPeriod, label: "Últimos 6" },
+    { key: "year" as FilterPeriod, label: "Ano" },
   ];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>📊 Relatórios</Text>
-        <Text style={styles.headerSubtitle}>Análise detalhada das suas finanças</Text>
+        <Text style={styles.headerSubtitle}>
+          Análise detalhada das suas finanças
+        </Text>
       </View>
 
       {/* Period Filter */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterScroll}
         contentContainerStyle={styles.filterContainer}
@@ -195,21 +222,46 @@ export default function ReportsScreen() {
 
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
-        <View style={[styles.summaryCard, { backgroundColor: Theme.colors.success + '20' }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: Theme.colors.success + "20" },
+          ]}
+        >
           <Text style={styles.summaryLabel}>💰 Receitas</Text>
           <Text style={[styles.summaryValue, { color: Theme.colors.success }]}>
             {formatCurrency(totals.income)}
           </Text>
         </View>
-        <View style={[styles.summaryCard, { backgroundColor: Theme.colors.danger + '20' }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: Theme.colors.danger + "20" },
+          ]}
+        >
           <Text style={styles.summaryLabel}>💸 Despesas</Text>
           <Text style={[styles.summaryValue, { color: Theme.colors.danger }]}>
             {formatCurrency(totals.expenses)}
           </Text>
         </View>
-        <View style={[styles.summaryCard, { backgroundColor: Theme.colors.primary + '20' }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: Theme.colors.primary + "20" },
+          ]}
+        >
           <Text style={styles.summaryLabel}>💎 Saldo</Text>
-          <Text style={[styles.summaryValue, { color: totals.balance >= 0 ? Theme.colors.success : Theme.colors.danger }]}>
+          <Text
+            style={[
+              styles.summaryValue,
+              {
+                color:
+                  totals.balance >= 0
+                    ? Theme.colors.success
+                    : Theme.colors.danger,
+              },
+            ]}
+          >
             {formatCurrency(totals.balance)}
           </Text>
         </View>
@@ -222,18 +274,18 @@ export default function ReportsScreen() {
           <View style={styles.card}>
             <BarChart
               data={{
-                labels: monthlyData.map(m => m.month),
+                labels: monthlyData.map((m) => m.month),
                 datasets: [
                   {
-                    data: monthlyData.map(m => m.expenses),
+                    data: monthlyData.map((m) => m.expenses),
                     color: () => Theme.colors.danger,
                   },
                   {
-                    data: monthlyData.map(m => m.income),
+                    data: monthlyData.map((m) => m.income),
                     color: () => Theme.colors.success,
                   },
                 ],
-                legend: ['Despesas', 'Receitas'],
+                legend: ["Despesas", "Receitas"],
               }}
               width={screenWidth - 64}
               height={220}
@@ -248,7 +300,7 @@ export default function ReportsScreen() {
                   borderRadius: Theme.borderRadius.md,
                 },
                 propsForBackgroundLines: {
-                  strokeDasharray: '',
+                  strokeDasharray: "",
                   stroke: Theme.colors.border,
                 },
               }}
@@ -268,10 +320,12 @@ export default function ReportsScreen() {
           <View style={styles.card}>
             <LineChart
               data={{
-                labels: monthlyData.map(m => m.month),
-                datasets: [{
-                  data: monthlyData.map(m => m.balance),
-                }],
+                labels: monthlyData.map((m) => m.month),
+                datasets: [
+                  {
+                    data: monthlyData.map((m) => m.balance),
+                  },
+                ],
               }}
               width={screenWidth - 64}
               height={220}
@@ -286,12 +340,12 @@ export default function ReportsScreen() {
                   borderRadius: Theme.borderRadius.md,
                 },
                 propsForDots: {
-                  r: '6',
-                  strokeWidth: '2',
+                  r: "6",
+                  strokeWidth: "2",
                   stroke: Theme.colors.primary,
                 },
                 propsForBackgroundLines: {
-                  strokeDasharray: '',
+                  strokeDasharray: "",
                   stroke: Theme.colors.border,
                 },
               }}
@@ -326,11 +380,18 @@ export default function ReportsScreen() {
               {categoryData.map((cat, index) => (
                 <View key={index} style={styles.categoryItem}>
                   <View style={styles.categoryLeft}>
-                    <View style={[styles.categoryDot, { backgroundColor: cat.color }]} />
+                    <View
+                      style={[
+                        styles.categoryDot,
+                        { backgroundColor: cat.color },
+                      ]}
+                    />
                     <Text style={styles.categoryName}>{cat.name}</Text>
                   </View>
                   <View style={styles.categoryRight}>
-                    <Text style={styles.categoryAmount}>{formatCurrency(cat.amount)}</Text>
+                    <Text style={styles.categoryAmount}>
+                      {formatCurrency(cat.amount)}
+                    </Text>
                     <Text style={styles.categoryPercent}>
                       {((cat.amount / totals.expenses) * 100).toFixed(1)}%
                     </Text>
@@ -347,20 +408,25 @@ export default function ReportsScreen() {
         <Text style={styles.sectionTitle}>💡 Insights</Text>
         <View style={styles.insightCard}>
           <Text style={styles.insightIcon}>
-            {totals.balance >= 0 ? '✅' : '⚠️'}
+            {totals.balance >= 0 ? "✅" : "⚠️"}
           </Text>
           <Text style={styles.insightText}>
             {totals.balance >= 0
-              ? `Você economizou ${formatCurrency(totals.balance)} no período selecionado!`
-              : `Atenção! Você gastou ${formatCurrency(Math.abs(totals.balance))} a mais do que ganhou.`}
+              ? `Você economizou ${formatCurrency(
+                  totals.balance
+                )} no período selecionado!`
+              : `Atenção! Você gastou ${formatCurrency(
+                  Math.abs(totals.balance)
+                )} a mais do que ganhou.`}
           </Text>
         </View>
-        
+
         {categoryData.length > 0 && (
           <View style={styles.insightCard}>
             <Text style={styles.insightIcon}>📊</Text>
             <Text style={styles.insightText}>
-              Sua maior despesa foi em {categoryData[0].name} com {formatCurrency(categoryData[0].amount)}
+              Sua maior despesa foi em {categoryData[0].name} com{" "}
+              {formatCurrency(categoryData[0].amount)}
             </Text>
           </View>
         )}
@@ -368,12 +434,16 @@ export default function ReportsScreen() {
         {monthlyData.length > 1 && (
           <View style={styles.insightCard}>
             <Text style={styles.insightIcon}>
-              {monthlyData[monthlyData.length - 1].balance > monthlyData[monthlyData.length - 2].balance ? '📈' : '📉'}
+              {monthlyData[monthlyData.length - 1].balance >
+              monthlyData[monthlyData.length - 2].balance
+                ? "📈"
+                : "📉"}
             </Text>
             <Text style={styles.insightText}>
-              {monthlyData[monthlyData.length - 1].balance > monthlyData[monthlyData.length - 2].balance
-                ? 'Seu saldo está melhorando! Continue assim.'
-                : 'Seu saldo diminuiu em relação ao mês anterior. Revise seus gastos.'}
+              {monthlyData[monthlyData.length - 1].balance >
+              monthlyData[monthlyData.length - 2].balance
+                ? "Seu saldo está melhorando! Continue assim."
+                : "Seu saldo diminuiu em relação ao mês anterior. Revise seus gastos."}
             </Text>
           </View>
         )}
@@ -396,7 +466,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: Theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
     marginBottom: Theme.spacing.xs,
   },
@@ -425,13 +495,13 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   filterTextActive: {
     color: Theme.colors.textPrimary,
   },
   summaryContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Theme.spacing.sm,
     marginBottom: Theme.spacing.xl,
   },
@@ -439,24 +509,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Theme.spacing.md,
     borderRadius: Theme.borderRadius.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   summaryLabel: {
     fontSize: Theme.fontSize.xs,
     color: Theme.colors.textSecondary,
     marginBottom: Theme.spacing.xs,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   summaryValue: {
     fontSize: Theme.fontSize.md,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   section: {
     marginBottom: Theme.spacing.xl,
   },
   sectionTitle: {
     fontSize: Theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Theme.colors.textPrimary,
     marginBottom: Theme.spacing.md,
   },
@@ -471,14 +541,14 @@ const styles = StyleSheet.create({
     marginTop: Theme.spacing.lg,
   },
   categoryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: Theme.spacing.md,
   },
   categoryLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   categoryDot: {
@@ -490,15 +560,15 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   categoryRight: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   categoryAmount: {
     fontSize: Theme.fontSize.sm,
     color: Theme.colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   categoryPercent: {
     fontSize: Theme.fontSize.xs,
@@ -506,7 +576,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   insightCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: Theme.colors.surface,
     padding: Theme.spacing.md,
     borderRadius: Theme.borderRadius.md,
